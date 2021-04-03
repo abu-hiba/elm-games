@@ -16,7 +16,7 @@ type alias Model =
 
 model : Model
 model =
-  { cards = List.range 1 5
+  { cards = List.range 1 52
   , points = 0
   }
 
@@ -34,7 +34,7 @@ update msg currModel =
       ( currModel, generate ShuffledList (shuffle model.cards) )
 
     ShuffledList shuffledList ->
-      ({ currModel | cards = shuffledList }, Cmd.none)
+      ( { currModel | cards = shuffledList }, Cmd.none )
 
 
 -- VIEW
@@ -42,9 +42,14 @@ update msg currModel =
 view : Model -> Html Msg
 view m =
   div []
-    [ div [] [ text <| toString <| m.cards ]
-    , div [ ] [ button [ onClick Shuffle ] [ text "Shuffle" ] ]
+    [ div [] ( List.map card m.cards )
+    , div [] [ button [ onClick Shuffle ] [ text "Shuffle" ] ]
     ]
+
+card : Int -> Html Msg
+card id =
+  div [] [ text <| toString <| id ]
+
 
 main : Program () Model Msg
 main =
