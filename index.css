@@ -1,0 +1,13 @@
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card {
+    font-size: 10em;
+    flex: 0 0 7.6%;
+}
+
+.red {
+    color: crimson;
+}
