@@ -11,3 +11,7 @@
 .red {
     color: crimson;
 }
+
+.back {
+    cursor: pointer;
+}

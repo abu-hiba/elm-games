@@ -12,8 +12,13 @@ import Debug exposing (toString)
 -- MODEL
 type alias Model =
   { cards : List Card
+  , currentCards : (SelectedCard, SelectedCard)
   , points : Int
   }
+  
+type SelectedCard
+  = NoCard
+  | Selected Card
 
 type CardValue
   = Ace
@@ -100,6 +105,7 @@ card_list =
 model : Model
 model =
   { cards = card_list
+  , currentCards = (NoCard, NoCard)
   , points = 0
   }
 
@@ -109,6 +115,7 @@ model =
 type Msg
   = Shuffle
   | ShuffledList (List Card)
+  | SelectCard Card
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg currModel =
@@ -119,23 +126,32 @@ update msg currModel =
     ShuffledList shuffledList ->
       ( { currModel | cards = shuffledList }, Cmd.none )
 
+    SelectCard selectedCard ->
+      case currModel.currentCards of
+        (NoCard, NoCard) -> ( { currModel | currentCards = (Selected selectedCard, NoCard) }, Cmd.none )
+        (Selected c, NoCard) -> ( { currModel | currentCards = (Selected c, Selected selectedCard) }, Cmd.none )
+        (Selected c1, Selected c2) -> ( { currModel | currentCards = (Selected selectedCard, NoCard) }, Cmd.none )
+        (NoCard, Selected c) -> ( { currModel | currentCards = (Selected selectedCard, Selected c) }, Cmd.none ) 
+
 
 -- VIEW
 
 view : Model -> Html Msg
 view m =
   div []
-    [ div [ class "cards" ] ( List.map viewCard m.cards )
+    [ div [ class "cards" ] ( List.map (viewCard m) m.cards )
     , div [] [ button [ onClick Shuffle ] [ text "Shuffle" ] ]
     ]
 
-viewCard : Card -> Html Msg
-viewCard c =
+viewCard : Model -> Card -> Html Msg
+viewCard m c =
   div [ classList [
           ("card", True),
-          ("red", c.suit == Hearts || c.suit == Diamonds )
-        ]
-      ] [ text (card c) ]
+          ("red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected m c)),
+          ("back", not (isSelected m c))
+        ],
+        onClick (SelectCard c)
+      ] [ text (if (isSelected m c) then card c else "🂠") ]
 
 card : Card -> String
 card c =
@@ -201,6 +217,14 @@ card c =
         Queen -> "🃝"
         King -> "🃞"
 
+
+isSelected : Model -> Card -> Bool
+isSelected m c =
+  case m.currentCards of
+    (_, Selected sc) -> if sc == c then True else False
+    (Selected sc, _) -> if sc == c then True else False
+    (_, _) -> False
+    
 
 main : Program () Model Msg
 main =
