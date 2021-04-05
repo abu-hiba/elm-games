@@ -217,9 +217,10 @@ card c =
 isSelected : Model -> Card -> Bool
 isSelected m c =
   case m.selectedCards of
-    (_, Just sc) -> if sc == c then True else False
-    (Just sc, _) -> if sc == c then True else False
-    (_, _) -> False
+    (Nothing, Just sc) -> if sc == c then True else False
+    (Just sc, Nothing) -> if sc == c then True else False
+    (Just sc1, Just sc2) -> if (sc1 == c) || (sc2 == c) then True else False
+    (Nothing, Nothing) -> False
     
 
 main : Program () Model Msg
