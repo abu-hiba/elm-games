@@ -12,14 +12,10 @@ import Debug exposing (toString)
 -- MODEL
 type alias Model =
   { cards : List Card
-  , currentCards : (SelectedCard, SelectedCard)
+  , selectedCards : (Maybe Card, Maybe Card)
   , points : Int
   }
   
-type SelectedCard
-  = NoCard
-  | Selected Card
-
 type CardValue
   = Ace
   | Two
@@ -46,8 +42,8 @@ type alias Card =
   , suit : Suit
   }
 
-card_list : List Card
-card_list = 
+deck : List Card
+deck = 
   [ { value = Ace, suit = Spades }
   , { value = Two, suit = Spades }
   , { value = Three, suit = Spades }
@@ -104,8 +100,8 @@ card_list =
 
 model : Model
 model =
-  { cards = card_list
-  , currentCards = (NoCard, NoCard)
+  { cards = deck
+  , selectedCards = (Nothing, Nothing)
   , points = 0
   }
 
@@ -127,11 +123,11 @@ update msg currModel =
       ( { currModel | cards = shuffledList }, Cmd.none )
 
     SelectCard selectedCard ->
-      case currModel.currentCards of
-        (NoCard, NoCard) -> ( { currModel | currentCards = (Selected selectedCard, NoCard) }, Cmd.none )
-        (Selected c, NoCard) -> ( { currModel | currentCards = (Selected c, Selected selectedCard) }, Cmd.none )
-        (Selected c1, Selected c2) -> ( { currModel | currentCards = (Selected selectedCard, NoCard) }, Cmd.none )
-        (NoCard, Selected c) -> ( { currModel | currentCards = (Selected selectedCard, Selected c) }, Cmd.none ) 
+      case currModel.selectedCards of
+        (Nothing, Nothing) -> ( { currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none )
+        (Just c, Nothing) -> ( { currModel | selectedCards = (Just c, Just selectedCard) }, Cmd.none )
+        (Just c1, Just c2) -> ( { currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none )
+        (Nothing, Just c) -> ( { currModel | selectedCards = (Just selectedCard, Just c) }, Cmd.none ) 
 
 
 -- VIEW
@@ -220,9 +216,9 @@ card c =
 
 isSelected : Model -> Card -> Bool
 isSelected m c =
-  case m.currentCards of
-    (_, Selected sc) -> if sc == c then True else False
-    (Selected sc, _) -> if sc == c then True else False
+  case m.selectedCards of
+    (_, Just sc) -> if sc == c then True else False
+    (Just sc, _) -> if sc == c then True else False
     (_, _) -> False
     
 
