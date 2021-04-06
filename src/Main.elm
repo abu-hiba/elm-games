@@ -13,7 +13,7 @@ import Debug exposing (toString)
 type alias Model =
   { cards : List Card
   , selectedCards : (Maybe Card, Maybe Card)
-  , points : Int
+  , matchedCards : List Card
   }
   
 type CardValue
@@ -102,7 +102,7 @@ model : Model
 model =
   { cards = deck
   , selectedCards = (Nothing, Nothing)
-  , points = 0
+  , matchedCards = []
   }
 
 
@@ -125,9 +125,30 @@ update msg currModel =
     SelectCard selectedCard ->
       case currModel.selectedCards of
         (Nothing, Nothing) -> ( { currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none )
-        (Just c, Nothing) -> ( { currModel | selectedCards = (Just c, Just selectedCard) }, Cmd.none )
-        (Just c1, Just c2) -> ( { currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none )
+        (Just c1, Just c2) -> (
+          { currModel
+          | selectedCards = (Just selectedCard, Nothing)
+          }
+          , Cmd.none)
+        (Just c, Nothing) -> (
+          { currModel
+          | selectedCards = if (isMatched selectedCard currModel.matchedCards) then (Just c, Nothing) else (Just c, Just selectedCard)
+          , matchedCards = if (isPair c selectedCard) then c :: selectedCard :: currModel.matchedCards else currModel.matchedCards
+          }
+          , Cmd.none)
+          -- TODO: Possibly handle differently as should never occur
         (Nothing, Just c) -> ( { currModel | selectedCards = (Just selectedCard, Just c) }, Cmd.none ) 
+
+isPair : Card -> Card -> Bool
+isPair c1 c2 =
+  if c1.value == c2.value then
+    case c1.suit of
+      Spades -> (c2.suit == Spades || c2.suit == Clubs)
+      Clubs -> (c2.suit == Spades || c2.suit == Clubs)
+      Hearts -> (c2.suit == Hearts || c2.suit == Diamonds)
+      Diamonds -> (c2.suit == Hearts || c2.suit == Diamonds)
+  else
+    False
 
 
 -- VIEW
@@ -143,11 +164,11 @@ viewCard : Model -> Card -> Html Msg
 viewCard m c =
   div [ classList [
           ("card", True),
-          ("red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected m c)),
+          ("red", (c.suit == Hearts || c.suit == Diamonds) && ((isSelected m c) || (isMatched c m.matchedCards))),
           ("back", not (isSelected m c))
         ],
         onClick (SelectCard c)
-      ] [ text (if (isSelected m c) then card c else "🂠") ]
+      ] [ text (if (isSelected m c) || (isMatched c m.matchedCards) then card c else "🂠") ]
 
 card : Card -> String
 card c =
@@ -221,7 +242,11 @@ isSelected m c =
     (Just sc, Nothing) -> if sc == c then True else False
     (Just sc1, Just sc2) -> if (sc1 == c) || (sc2 == c) then True else False
     (Nothing, Nothing) -> False
-    
+
+isMatched : Card -> List Card -> Bool
+isMatched c matches =
+  List.member c matches
+
 
 main : Program () Model Msg
 main =
