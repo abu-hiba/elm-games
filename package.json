@@ -4,7 +4,8 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "parcel src/index.html -d dev",
+    "build": "parcel build src/index.html",
     "elm": "./node_modules/elm/bin/elm",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

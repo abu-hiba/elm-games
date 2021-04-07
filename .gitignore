@@ -2,6 +2,6 @@ elm-stuff
 main.js
 .DS_Store
 node_modules
-public
+dev
 dist
 .cache
