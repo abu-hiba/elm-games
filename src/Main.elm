@@ -8,14 +8,6 @@ import Random exposing (generate)
 import Random.List exposing (shuffle)
 import Debug exposing (toString)
 
-
--- MODEL
-type alias Model =
-  { cards : List Card
-  , selectedCards : (Maybe Card, Maybe Card)
-  , matchedCards : List Card
-  }
-  
 type CardValue
   = Ace
   | Two
@@ -40,64 +32,72 @@ type Suit
 type alias Card =
   { value : CardValue
   , suit : Suit
+  , face : String
   }
 
 deck : List Card
 deck = 
-  [ { value = Ace, suit = Spades }
-  , { value = Two, suit = Spades }
-  , { value = Three, suit = Spades }
-  , { value = Four, suit = Spades }
-  , { value = Five, suit = Spades }
-  , { value = Six, suit = Spades }
-  , { value = Seven, suit = Spades }
-  , { value = Eight, suit = Spades }
-  , { value = Nine, suit = Spades }
-  , { value = Ten, suit = Spades }
-  , { value = Jack, suit = Spades }
-  , { value = Queen, suit = Spades }
-  , { value = King, suit = Spades }
-  , { value = Ace, suit = Hearts }
-  , { value = Two, suit = Hearts }
-  , { value = Three, suit = Hearts }
-  , { value = Four, suit = Hearts }
-  , { value = Five, suit = Hearts }
-  , { value = Six, suit = Hearts }
-  , { value = Seven, suit = Hearts }
-  , { value = Eight, suit = Hearts }
-  , { value = Nine, suit = Hearts }
-  , { value = Ten, suit = Hearts }
-  , { value = Jack, suit = Hearts }
-  , { value = Queen, suit = Hearts }
-  , { value = King, suit = Hearts }
-  , { value = Ace, suit = Clubs }
-  , { value = Two, suit = Clubs }
-  , { value = Three, suit = Clubs }
-  , { value = Four, suit = Clubs }
-  , { value = Five, suit = Clubs }
-  , { value = Six, suit = Clubs }
-  , { value = Seven, suit = Clubs }
-  , { value = Eight, suit = Clubs }
-  , { value = Nine, suit = Clubs }
-  , { value = Ten, suit = Clubs }
-  , { value = Jack, suit = Clubs }
-  , { value = Queen, suit = Clubs }
-  , { value = King, suit = Clubs }
-  , { value = Ace, suit = Diamonds }
-  , { value = Two, suit = Diamonds }
-  , { value = Three, suit = Diamonds }
-  , { value = Four, suit = Diamonds }
-  , { value = Five, suit = Diamonds }
-  , { value = Six, suit = Diamonds }
-  , { value = Seven, suit = Diamonds }
-  , { value = Eight, suit = Diamonds }
-  , { value = Nine, suit = Diamonds }
-  , { value = Ten, suit = Diamonds }
-  , { value = Jack, suit = Diamonds }
-  , { value = Queen, suit = Diamonds }
-  , { value = King, suit = Diamonds }
+  [ { value = Ace, suit = Spades, face = "🂡" }
+  , { value = Two, suit = Spades, face = "🂢" }
+  , { value = Three, suit = Spades, face = "🂣" }
+  , { value = Four, suit = Spades, face = "🂣" }
+  , { value = Five, suit = Spades, face = "🂥" }
+  , { value = Six, suit = Spades, face = "🂦" }
+  , { value = Seven, suit = Spades, face = "🂧" }
+  , { value = Eight, suit = Spades, face = "🂨" }
+  , { value = Nine, suit = Spades, face = "🂩" }
+  , { value = Ten, suit = Spades, face = "🂪" }
+  , { value = Jack, suit = Spades, face = "🂫" }
+  , { value = Queen, suit = Spades, face = "🂭" }
+  , { value = King, suit = Spades, face = "🂮" }
+  , { value = Ace, suit = Hearts, face = "🂱" }
+  , { value = Two, suit = Hearts, face = "🂲" }
+  , { value = Three, suit = Hearts, face = "🂳" }
+  , { value = Four, suit = Hearts, face = "🂴" }
+  , { value = Five, suit = Hearts, face = "🂵" }
+  , { value = Six, suit = Hearts, face = "🂶" }
+  , { value = Seven, suit = Hearts, face = "🂷" }
+  , { value = Eight, suit = Hearts, face = "🂸" }
+  , { value = Nine, suit = Hearts, face = "🂹" }
+  , { value = Ten, suit = Hearts, face = "🂺" }
+  , { value = Jack, suit = Hearts, face = "🂻" }
+  , { value = Queen, suit = Hearts, face = "🂽" }
+  , { value = King, suit = Hearts, face = "🂾" }
+  , { value = Ace, suit = Clubs, face = "🃁" }
+  , { value = Two, suit = Clubs, face = "🃂" }
+  , { value = Three, suit = Clubs, face = "🃃" }
+  , { value = Four, suit = Clubs, face = "🃄" }
+  , { value = Five, suit = Clubs, face = "🃅" }
+  , { value = Six, suit = Clubs, face = "🃆" }
+  , { value = Seven, suit = Clubs, face = "🃇" }
+  , { value = Eight, suit = Clubs, face = "🃈" }
+  , { value = Nine, suit = Clubs, face = "🃉" }
+  , { value = Ten, suit = Clubs, face = "🃊" }
+  , { value = Jack, suit = Clubs, face = "🃋" }
+  , { value = Queen, suit = Clubs, face = "🃍" }
+  , { value = King, suit = Clubs, face = "🃎" }
+  , { value = Ace, suit = Diamonds, face = "🃑" }
+  , { value = Two, suit = Diamonds, face = "🃒" }
+  , { value = Three, suit = Diamonds, face = "🃓" }
+  , { value = Four, suit = Diamonds, face = "🃔" }
+  , { value = Five, suit = Diamonds, face = "🃕" }
+  , { value = Six, suit = Diamonds, face = "🃖" }
+  , { value = Seven, suit = Diamonds, face = "🃗" }
+  , { value = Eight, suit = Diamonds, face = "🃘" }
+  , { value = Nine, suit = Diamonds, face = "🃙" }
+  , { value = Ten, suit = Diamonds, face = "🃚" }
+  , { value = Jack, suit = Diamonds, face = "🃛" }
+  , { value = Queen, suit = Diamonds, face = "🃝" }
+  , { value = King, suit = Diamonds, face = "🃞" }
   ]
 
+-- MODEL
+type alias Model =
+  { cards : List Card
+  , selectedCards : (Maybe Card, Maybe Card)
+  , matchedCards : List Card
+  }
+  
 model : Model
 model =
   { cards = deck
@@ -107,7 +107,6 @@ model =
 
 
 -- UPDATE
-
 type Msg
   = Shuffle
   | ShuffledList (List Card)
@@ -152,7 +151,6 @@ isPair c1 c2 =
 
 
 -- VIEW
-
 view : Model -> Html Msg
 view m =
   div []
@@ -168,72 +166,7 @@ viewCard m c =
           ("back", not (isSelected m c))
         ],
         onClick (SelectCard c)
-      ] [ text (if (isSelected m c) || (isMatched c m.matchedCards) then card c else "🂠") ]
-
-card : Card -> String
-card c =
-  case c.suit of
-    Spades ->
-      case c.value of
-        Ace -> "🂡"
-        Two -> "🂢"
-        Three -> "🂣"
-        Four -> "🂤" 
-        Five -> "🂥"
-        Six -> "🂦"
-        Seven -> "🂧" 
-        Eight -> "🂨"
-        Nine -> "🂩"
-        Ten -> "🂪"
-        Jack -> "🂫"
-        Queen -> "🂭"
-        King -> "🂮"
-    Hearts ->
-      case c.value of
-        Ace -> "🂱"
-        Two -> "🂲"
-        Three -> "🂳"
-        Four -> "🂴"
-        Five -> "🂵"
-        Six -> "🂶"
-        Seven -> "🂷"
-        Eight -> "🂸"
-        Nine -> "🂹"
-        Ten -> "🂺"
-        Jack -> "🂻"
-        Queen -> "🂽"
-        King -> "🂾"
-    Diamonds ->
-      case c.value of
-        Ace -> "🃁"
-        Two -> "🃂"
-        Three -> "🃃"
-        Four -> "🃄"
-        Five -> "🃅"
-        Six -> "🃆"
-        Seven -> "🃇"
-        Eight -> "🃈"
-        Nine -> "🃉"
-        Ten -> "🃊"
-        Jack -> "🃋"
-        Queen -> "🃍"
-        King -> "🃎"
-    Clubs ->
-      case c.value of
-        Ace -> "🃑"
-        Two -> "🃒"
-        Three -> "🃓"
-        Four -> "🃔"
-        Five -> "🃕"
-        Six -> "🃖"
-        Seven -> "🃗"
-        Eight -> "🃘"
-        Nine -> "🃙"
-        Ten -> "🃚"
-        Jack -> "🃛"
-        Queen -> "🃝"
-        King -> "🃞"
-
+      ] [ text (if (isSelected m c) || (isMatched c m.matchedCards) then c.face else "🂠") ]
 
 isSelected : Model -> Card -> Bool
 isSelected m c =
