@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (style, class, classList)
+import Html.Attributes exposing (class, classList)
 import Random
 import Random.List exposing (shuffle)
 
@@ -33,6 +33,8 @@ type alias Card =
   , suit : Suit
   , face : String
   }
+
+type alias SelectedCards = (Maybe Card, Maybe Card)
 
 deck : List Card
 deck = 
@@ -93,7 +95,7 @@ deck =
 -- MODEL
 type alias Model =
   { cards : List Card
-  , selectedCards : (Maybe Card, Maybe Card)
+  , selectedCards : SelectedCards
   , matchedCards : List Card
   }
   
@@ -123,11 +125,7 @@ update msg currModel =
     SelectCard selectedCard ->
       case currModel.selectedCards of
         (Nothing, Nothing) -> ({ currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none)
-        (Just c1, Just c2) -> (
-          { currModel
-          | selectedCards = (Just selectedCard, Nothing)
-          }
-          , Cmd.none)
+        (Just _, Just _) -> ({ currModel | selectedCards = (Just selectedCard, Nothing)}, Cmd.none)
         (Just c, Nothing) -> (
           { currModel
           | selectedCards = if (isMatched selectedCard currModel.matchedCards) then (Just c, Nothing) else (Just c, Just selectedCard)
@@ -161,15 +159,15 @@ viewCard : Model -> Card -> Html Msg
 viewCard m c =
   div [ classList [
           ("card", True),
-          ("red", (c.suit == Hearts || c.suit == Diamonds) && ((isSelected m c) || (isMatched c m.matchedCards))),
-          ("back", not (isSelected m c))
+          ("red", (c.suit == Hearts || c.suit == Diamonds) && ((isSelected c m.selectedCards) || (isMatched c m.matchedCards))),
+          ("back", not (isSelected c m.selectedCards))
         ],
         onClick (SelectCard c)
-      ] [ text (if (isSelected m c) || (isMatched c m.matchedCards) then c.face else "🂠") ]
+      ] [ text (if (isSelected c m.selectedCards) || (isMatched c m.matchedCards) then c.face else "🂠") ]
 
-isSelected : Model -> Card -> Bool
-isSelected m c =
-  case m.selectedCards of
+isSelected : Card -> SelectedCards -> Bool
+isSelected c currentSelected =
+  case currentSelected of
     (Nothing, Just sc) -> if sc == c then True else False
     (Just sc, Nothing) -> if sc == c then True else False
     (Just sc1, Just sc2) -> if (sc1 == c) || (sc2 == c) then True else False
