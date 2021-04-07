@@ -6,7 +6,6 @@ import Html.Events exposing (onClick)
 import Html.Attributes exposing (style, class, classList)
 import Random
 import Random.List exposing (shuffle)
-import Debug exposing (toString)
 
 type CardValue
   = Ace
