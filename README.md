@@ -1,9 +1,9 @@
-To run with automatic update run
+To start development server, run:
 ```
-elm reactor
+npm start
 ```
 
-To create an optimized `.js` file run
+To create an optimized `.js` file run:
 ```
 elm make src/Main.elm --optimize --output=main.js
 ```
