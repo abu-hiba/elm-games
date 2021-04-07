@@ -4,7 +4,6 @@ import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (style, class, classList)
-import Random exposing (generate)
 import Random.List exposing (shuffle)
 import Debug exposing (toString)
 
@@ -112,18 +111,18 @@ type Msg
   | ShuffledList (List Card)
   | SelectCard Card
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg currModel =
   case msg of
     Shuffle ->
-      ( currModel, generate ShuffledList (shuffle model.cards) )
+      (currModel, Random.generate ShuffledList (shuffle model.cards))
 
     ShuffledList shuffledList ->
-      ( { currModel | cards = shuffledList }, Cmd.none )
+      ({ currModel | cards = shuffledList }, Cmd.none)
 
     SelectCard selectedCard ->
       case currModel.selectedCards of
-        (Nothing, Nothing) -> ( { currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none )
+        (Nothing, Nothing) -> ({ currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none)
         (Just c1, Just c2) -> (
           { currModel
           | selectedCards = (Just selectedCard, Nothing)
@@ -136,7 +135,7 @@ update msg currModel =
           }
           , Cmd.none)
           -- TODO: Possibly handle differently as should never occur
-        (Nothing, Just c) -> ( { currModel | selectedCards = (Just selectedCard, Just c) }, Cmd.none ) 
+        (Nothing, Just c) -> ({ currModel | selectedCards = (Just selectedCard, Just c) }, Cmd.none) 
 
 isPair : Card -> Card -> Bool
 isPair c1 c2 =
@@ -154,7 +153,7 @@ isPair c1 c2 =
 view : Model -> Html Msg
 view m =
   div []
-    [ div [ class "cards" ] ( List.map (viewCard m) m.cards )
+    [ div [ class "cards" ] (List.map (viewCard m) m.cards)
     , div [] [ button [ onClick Shuffle ] [ text "Shuffle" ] ]
     ]
 
