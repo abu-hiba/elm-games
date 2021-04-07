@@ -1,9 +1,13 @@
-To run with automatic update run
+Install dependencies:
 ```
-elm reactor
+npm i
+```
+To start development server run:
+```
+npm start
 ```
 
-To create an optimized `.js` file run
+To create a production build run:
 ```
-elm make src/Main.elm --optimize --output=main.js
+npm run build
 ```
