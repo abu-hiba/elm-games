@@ -3,9 +3,10 @@ module Main exposing (..)
 import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (style, class, classList)
+import Html.Attributes exposing (class, classList)
 import Random
 import Random.List exposing (shuffle)
+import Time
 
 type CardValue
   = Ace
@@ -34,12 +35,14 @@ type alias Card =
   , face : String
   }
 
+type alias SelectedCards = (Maybe Card, Maybe Card)
+
 deck : List Card
 deck = 
   [ { value = Ace, suit = Spades, face = "🂡" }
   , { value = Two, suit = Spades, face = "🂢" }
   , { value = Three, suit = Spades, face = "🂣" }
-  , { value = Four, suit = Spades, face = "🂣" }
+  , { value = Four, suit = Spades, face = "🂤" }
   , { value = Five, suit = Spades, face = "🂥" }
   , { value = Six, suit = Spades, face = "🂦" }
   , { value = Seven, suit = Spades, face = "🂧" }
@@ -93,15 +96,19 @@ deck =
 -- MODEL
 type alias Model =
   { cards : List Card
-  , selectedCards : (Maybe Card, Maybe Card)
+  , selectedCards : SelectedCards
   , matchedCards : List Card
+  , timer : Int
+  , gameStarted : Bool
   }
-  
+
 model : Model
 model =
   { cards = deck
   , selectedCards = (Nothing, Nothing)
   , matchedCards = []
+  , timer = 0
+  , gameStarted = False
   }
 
 
@@ -110,6 +117,9 @@ type Msg
   = Shuffle
   | ShuffledList (List Card)
   | SelectCard Card
+  | IncrementTimer Time.Posix
+  | ResetGame
+  | StartGame
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg currModel =
@@ -123,19 +133,30 @@ update msg currModel =
     SelectCard selectedCard ->
       case currModel.selectedCards of
         (Nothing, Nothing) -> ({ currModel | selectedCards = (Just selectedCard, Nothing) }, Cmd.none)
-        (Just c1, Just c2) -> (
-          { currModel
-          | selectedCards = (Just selectedCard, Nothing)
-          }
-          , Cmd.none)
+        (Just _, Just _) -> ({ currModel | selectedCards = (Just selectedCard, Nothing)}, Cmd.none)
         (Just c, Nothing) -> (
           { currModel
-          | selectedCards = if (isMatched selectedCard currModel.matchedCards) then (Just c, Nothing) else (Just c, Just selectedCard)
-          , matchedCards = if (isPair c selectedCard) then c :: selectedCard :: currModel.matchedCards else currModel.matchedCards
+          | selectedCards =
+            if (isMatched selectedCard currModel.matchedCards) then
+              (Just c, Nothing)
+            else
+              (Just c, Just selectedCard)
+          , matchedCards =
+            if (isPair c selectedCard) then
+              c :: selectedCard :: currModel.matchedCards
+            else
+            currModel.matchedCards
           }
           , Cmd.none)
           -- TODO: Possibly handle differently as should never occur
         (Nothing, Just c) -> ({ currModel | selectedCards = (Just selectedCard, Just c) }, Cmd.none) 
+    
+    IncrementTimer _ ->
+      ({ currModel | timer = currModel.timer + 1 }, Cmd.none)
+
+    ResetGame -> (model, Cmd.none)
+
+    StartGame -> ({ currModel | gameStarted = True }, Random.generate ShuffledList (shuffle currModel.cards))
 
 isPair : Card -> Card -> Bool
 isPair c1 c2 =
@@ -153,23 +174,27 @@ isPair c1 c2 =
 view : Model -> Html Msg
 view m =
   div []
-    [ div [ class "cards" ] (List.map (viewCard m) m.cards)
-    , div [] [ button [ onClick Shuffle ] [ text "Shuffle" ] ]
+    [ div [] [ text <| String.fromInt <| m.timer ] 
+    , div [ class "cards" ] (List.map (viewCard m) m.cards)
+    , div []
+        [ button [ onClick ResetGame ] [ text "Reset" ]
+        , button [ onClick StartGame ] [ text "Start" ]
+        ]
     ]
 
 viewCard : Model -> Card -> Html Msg
 viewCard m c =
   div [ classList [
           ("card", True),
-          ("red", (c.suit == Hearts || c.suit == Diamonds) && ((isSelected m c) || (isMatched c m.matchedCards))),
-          ("back", not (isSelected m c))
+          ("red", (c.suit == Hearts || c.suit == Diamonds) && ((isSelected c m.selectedCards) || (isMatched c m.matchedCards))),
+          ("back", not (isSelected c m.selectedCards))
         ],
         onClick (SelectCard c)
-      ] [ text (if (isSelected m c) || (isMatched c m.matchedCards) then c.face else "🂠") ]
+      ] [ text (if (isSelected c m.selectedCards) || (isMatched c m.matchedCards) then c.face else "🂠") ]
 
-isSelected : Model -> Card -> Bool
-isSelected m c =
-  case m.selectedCards of
+isSelected : Card -> SelectedCards -> Bool
+isSelected c currentSelected =
+  case currentSelected of
     (Nothing, Just sc) -> if sc == c then True else False
     (Just sc, Nothing) -> if sc == c then True else False
     (Just sc1, Just sc2) -> if (sc1 == c) || (sc2 == c) then True else False
@@ -180,11 +205,19 @@ isMatched c matches =
   List.member c matches
 
 
+-- Subscriptions
+subscriptions : Model -> Sub Msg
+subscriptions m =
+    if m.gameStarted && ((List.length m.matchedCards) < 52) then
+      Time.every 1000 IncrementTimer
+    else 
+      Sub.none
+
 main : Program () Model Msg
 main =
     Browser.element
         { init = \_ -> (model, Cmd.none)
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
