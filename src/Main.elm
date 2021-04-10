@@ -161,13 +161,13 @@ update msg currModel =
                 ( Just c, Nothing ) ->
                     ( { currModel
                         | selectedCards =
-                            if List.member selectedCard currModel.matchedCards then
+                            if List.member selectedCard currModel.matchedCards || (c == selectedCard) then
                                 ( Just c, Nothing )
 
                             else
                                 ( Just c, Just selectedCard )
                         , matchedCards =
-                            if isPair c selectedCard then
+                            if isPair c selectedCard && not (c == selectedCard) then
                                 c :: selectedCard :: currModel.matchedCards
 
                             else
