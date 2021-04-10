@@ -100,6 +100,11 @@ deck =
     ]
 
 
+cardBack : String
+cardBack =
+    "🂠"
+
+
 
 -- MODEL
 
@@ -156,7 +161,7 @@ update msg currModel =
                 ( Just c, Nothing ) ->
                     ( { currModel
                         | selectedCards =
-                            if isMatched selectedCard currModel.matchedCards then
+                            if List.member selectedCard currModel.matchedCards then
                                 ( Just c, Nothing )
 
                             else
@@ -226,17 +231,17 @@ viewCard m c =
     div
         [ classList
             [ ( "card", True )
-            , ( "red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected c m.selectedCards || isMatched c m.matchedCards) )
+            , ( "red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected c m.selectedCards || List.member c m.matchedCards) )
             , ( "back", not (isSelected c m.selectedCards) )
             ]
         , onClick (SelectCard c)
         ]
         [ text
-            (if isSelected c m.selectedCards || isMatched c m.matchedCards then
+            (if isSelected c m.selectedCards || List.member c m.matchedCards then
                 c.face
 
              else
-                "🂠"
+                cardBack
             )
         ]
 
@@ -255,11 +260,6 @@ isSelected c currentSelected =
 
         ( Nothing, Nothing ) ->
             False
-
-
-isMatched : Card -> List Card -> Bool
-isMatched c matches =
-    List.member c matches
 
 
 
