@@ -245,25 +245,13 @@ isSelected : Card -> SelectedCards -> Bool
 isSelected c currentSelected =
     case currentSelected of
         ( Nothing, Just sc ) ->
-            if sc == c then
-                True
-
-            else
-                False
+            sc == c
 
         ( Just sc, Nothing ) ->
-            if sc == c then
-                True
-
-            else
-                False
+            sc == c
 
         ( Just sc1, Just sc2 ) ->
-            if (sc1 == c) || (sc2 == c) then
-                True
-
-            else
-                False
+            (sc1 == c) || (sc2 == c)
 
         ( Nothing, Nothing ) ->
             False
