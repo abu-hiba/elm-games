@@ -176,9 +176,9 @@ update msg currModel =
                     , Cmd.none
                     )
 
-                -- TODO: Possibly handle differently as should never occur
+                -- should never occur
                 ( Nothing, Just c ) ->
-                    ( { currModel | selectedCards = ( Just selectedCard, Just c ) }, Cmd.none )
+                    ( currModel, Cmd.none )
 
         IncrementTimer _ ->
             ( { currModel | timer = currModel.timer + 1 }, Cmd.none )
