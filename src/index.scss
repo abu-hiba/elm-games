@@ -11,6 +11,10 @@
         font-size: 4em;
         flex: 0 0 10%;
     }
+
+    @media screen and (max-width: 1024px) {
+        font-size: 6.9em;
+    }
 }
 
 .red {
