@@ -1,5 +1,5 @@
 import { Elm } from './Main.elm';
-import './index.css';
+import './index.scss';
 
 Elm.Main.init({
   node: document.getElementById('elm-node')

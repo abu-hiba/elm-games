@@ -100,6 +100,11 @@ deck =
     ]
 
 
+cardBack : String
+cardBack =
+    "🂠"
+
+
 
 -- MODEL
 
@@ -134,6 +139,7 @@ type Msg
     | IncrementTimer Time.Posix
     | ResetGame
     | StartGame
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -156,13 +162,13 @@ update msg currModel =
                 ( Just c, Nothing ) ->
                     ( { currModel
                         | selectedCards =
-                            if isMatched selectedCard currModel.matchedCards then
+                            if List.member selectedCard currModel.matchedCards || (c == selectedCard) then
                                 ( Just c, Nothing )
 
                             else
                                 ( Just c, Just selectedCard )
                         , matchedCards =
-                            if isPair c selectedCard then
+                            if isPair c selectedCard && not (c == selectedCard) then
                                 c :: selectedCard :: currModel.matchedCards
 
                             else
@@ -171,9 +177,9 @@ update msg currModel =
                     , Cmd.none
                     )
 
-                -- TODO: Possibly handle differently as should never occur
-                ( Nothing, Just c ) ->
-                    ( { currModel | selectedCards = ( Just selectedCard, Just c ) }, Cmd.none )
+                -- should never occur
+                ( Nothing, Just _ ) ->
+                    ( currModel, Cmd.none )
 
         IncrementTimer _ ->
             ( { currModel | timer = currModel.timer + 1 }, Cmd.none )
@@ -183,6 +189,9 @@ update msg currModel =
 
         StartGame ->
             ( { currModel | gameStarted = True }, Random.generate ShuffledList (shuffle currModel.cards) )
+
+        NoOp ->
+            ( currModel, Cmd.none )
 
 
 isPair : Card -> Card -> Bool
@@ -212,12 +221,12 @@ isPair c1 c2 =
 view : Model -> Html Msg
 view m =
     div []
-        [ div [] [ text <| String.fromInt <| m.timer ]
-        , div [ class "cards" ] (List.map (viewCard m) m.cards)
-        , div []
-            [ button [ onClick ResetGame ] [ text "Reset" ]
-            , button [ onClick StartGame ] [ text "Start" ]
+        [ div [ class "controls" ]
+            [ button [ onClick StartGame ] [ text "Start" ]
+            , text <| String.fromInt m.timer
+            , button [ onClick ResetGame ] [ text "Reset" ]
             ]
+        , div [ class "cards" ] (List.map (viewCard m) m.cards)
         ]
 
 
@@ -226,17 +235,23 @@ viewCard m c =
     div
         [ classList
             [ ( "card", True )
-            , ( "red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected c m.selectedCards || isMatched c m.matchedCards) )
+            , ( "red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected c m.selectedCards || List.member c m.matchedCards) )
             , ( "back", not (isSelected c m.selectedCards) )
             ]
-        , onClick (SelectCard c)
+        , onClick
+            (if m.gameStarted then
+                SelectCard c
+
+             else
+                NoOp
+            )
         ]
         [ text
-            (if isSelected c m.selectedCards || isMatched c m.matchedCards then
+            (if isSelected c m.selectedCards || List.member c m.matchedCards then
                 c.face
 
              else
-                "🂠"
+                cardBack
             )
         ]
 
@@ -245,33 +260,16 @@ isSelected : Card -> SelectedCards -> Bool
 isSelected c currentSelected =
     case currentSelected of
         ( Nothing, Just sc ) ->
-            if sc == c then
-                True
-
-            else
-                False
+            sc == c
 
         ( Just sc, Nothing ) ->
-            if sc == c then
-                True
-
-            else
-                False
+            sc == c
 
         ( Just sc1, Just sc2 ) ->
-            if (sc1 == c) || (sc2 == c) then
-                True
-
-            else
-                False
+            (sc1 == c) || (sc2 == c)
 
         ( Nothing, Nothing ) ->
             False
-
-
-isMatched : Card -> List Card -> Bool
-isMatched c matches =
-    List.member c matches
 
 
 

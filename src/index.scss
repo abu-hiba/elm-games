@@ -1,0 +1,37 @@
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card {
+    font-size: 10em;
+    flex: 0 0 7.6%;
+
+    @media screen and (max-width: 600px) {
+        font-size: 4em;
+        flex: 0 0 10%;
+    }
+
+    @media screen and (max-width: 1024px) {
+        font-size: 6.9em;
+    }
+}
+
+.red {
+    color: crimson;
+}
+
+.back {
+    cursor: pointer;
+}
+
+.controls {
+    font-size: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    button {
+        font-size: 0.7em;
+    }
+}
