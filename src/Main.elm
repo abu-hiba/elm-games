@@ -221,12 +221,12 @@ isPair c1 c2 =
 view : Model -> Html Msg
 view m =
     div []
-        [ div [] [ text <| String.fromInt m.timer ]
-        , div [ class "cards" ] (List.map (viewCard m) m.cards)
-        , div []
-            [ button [ onClick ResetGame ] [ text "Reset" ]
-            , button [ onClick StartGame ] [ text "Start" ]
+        [ div [ class "controls" ]
+            [ button [ onClick StartGame ] [ text "Start" ]
+            , text <| String.fromInt m.timer
+            , button [ onClick ResetGame ] [ text "Reset" ]
             ]
+        , div [ class "cards" ] (List.map (viewCard m) m.cards)
         ]
 
 
