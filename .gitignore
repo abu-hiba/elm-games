@@ -1,3 +1,7 @@
 elm-stuff
-elm.js
+main.js
 .DS_Store
+node_modules
+dev
+dist
+.cache
