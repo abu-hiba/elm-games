@@ -139,6 +139,7 @@ type Msg
     | IncrementTimer Time.Posix
     | ResetGame
     | StartGame
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -177,7 +178,7 @@ update msg currModel =
                     )
 
                 -- should never occur
-                ( Nothing, Just c ) ->
+                ( Nothing, Just _ ) ->
                     ( currModel, Cmd.none )
 
         IncrementTimer _ ->
@@ -188,6 +189,9 @@ update msg currModel =
 
         StartGame ->
             ( { currModel | gameStarted = True }, Random.generate ShuffledList (shuffle currModel.cards) )
+
+        NoOp ->
+            ( currModel, Cmd.none )
 
 
 isPair : Card -> Card -> Bool
@@ -217,7 +221,7 @@ isPair c1 c2 =
 view : Model -> Html Msg
 view m =
     div []
-        [ div [] [ text <| String.fromInt <| m.timer ]
+        [ div [] [ text <| String.fromInt m.timer ]
         , div [ class "cards" ] (List.map (viewCard m) m.cards)
         , div []
             [ button [ onClick ResetGame ] [ text "Reset" ]
@@ -234,7 +238,13 @@ viewCard m c =
             , ( "red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected c m.selectedCards || List.member c m.matchedCards) )
             , ( "back", not (isSelected c m.selectedCards) )
             ]
-        , onClick (SelectCard c)
+        , onClick
+            (if m.gameStarted then
+                SelectCard c
+
+             else
+                NoOp
+            )
         ]
         [ text
             (if isSelected c m.selectedCards || List.member c m.matchedCards then
