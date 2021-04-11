@@ -4,7 +4,7 @@
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#fff",
-    "description": "",
+    "description": "Pairs game written with elm",
     "icons": [{
       "src": "icon-48.png",
       "sizes": "48x48",
