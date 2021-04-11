@@ -1,0 +1,25 @@
+{
+    "name": "ElmGames",
+    "short_name": "ElmGames",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#fff",
+    "description": "Pairs game written with elm",
+    "icons": [{
+      "src": "icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }, {
+      "src": "icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    }, {
+      "src": "icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }, {
+      "src": "icon-167.png",
+      "sizes": "168x168",
+      "type": "image/png"
+    }]
+  }
