@@ -3,10 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Main</title>
+  <link rel="manifest" href="./manifest.webmanifest">
 </head>
 
 <body>
   <div id="elm-node"></div>
   <script src="./index.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
+    </script>
 </body>
 </html>
