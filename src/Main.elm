@@ -1,8 +1,8 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, text)
-import Html.Attributes exposing (class, classList)
+import Html exposing (Html, button, div, img, text)
+import Html.Attributes exposing (class, classList, selected, src)
 import Html.Events exposing (onClick)
 import Random
 import Random.List exposing (shuffle)
@@ -35,7 +35,7 @@ type Suit
 type alias Card =
     { value : CardValue
     , suit : Suit
-    , face : String
+    , image : String
     }
 
 
@@ -45,64 +45,59 @@ type alias SelectedCards =
 
 deck : List Card
 deck =
-    [ { value = Ace, suit = Spades, face = "🂡" }
-    , { value = Two, suit = Spades, face = "🂢" }
-    , { value = Three, suit = Spades, face = "🂣" }
-    , { value = Four, suit = Spades, face = "🂤" }
-    , { value = Five, suit = Spades, face = "🂥" }
-    , { value = Six, suit = Spades, face = "🂦" }
-    , { value = Seven, suit = Spades, face = "🂧" }
-    , { value = Eight, suit = Spades, face = "🂨" }
-    , { value = Nine, suit = Spades, face = "🂩" }
-    , { value = Ten, suit = Spades, face = "🂪" }
-    , { value = Jack, suit = Spades, face = "🂫" }
-    , { value = Queen, suit = Spades, face = "🂭" }
-    , { value = King, suit = Spades, face = "🂮" }
-    , { value = Ace, suit = Hearts, face = "🂱" }
-    , { value = Two, suit = Hearts, face = "🂲" }
-    , { value = Three, suit = Hearts, face = "🂳" }
-    , { value = Four, suit = Hearts, face = "🂴" }
-    , { value = Five, suit = Hearts, face = "🂵" }
-    , { value = Six, suit = Hearts, face = "🂶" }
-    , { value = Seven, suit = Hearts, face = "🂷" }
-    , { value = Eight, suit = Hearts, face = "🂸" }
-    , { value = Nine, suit = Hearts, face = "🂹" }
-    , { value = Ten, suit = Hearts, face = "🂺" }
-    , { value = Jack, suit = Hearts, face = "🂻" }
-    , { value = Queen, suit = Hearts, face = "🂽" }
-    , { value = King, suit = Hearts, face = "🂾" }
-    , { value = Ace, suit = Clubs, face = "🃁" }
-    , { value = Two, suit = Clubs, face = "🃂" }
-    , { value = Three, suit = Clubs, face = "🃃" }
-    , { value = Four, suit = Clubs, face = "🃄" }
-    , { value = Five, suit = Clubs, face = "🃅" }
-    , { value = Six, suit = Clubs, face = "🃆" }
-    , { value = Seven, suit = Clubs, face = "🃇" }
-    , { value = Eight, suit = Clubs, face = "🃈" }
-    , { value = Nine, suit = Clubs, face = "🃉" }
-    , { value = Ten, suit = Clubs, face = "🃊" }
-    , { value = Jack, suit = Clubs, face = "🃋" }
-    , { value = Queen, suit = Clubs, face = "🃍" }
-    , { value = King, suit = Clubs, face = "🃎" }
-    , { value = Ace, suit = Diamonds, face = "🃑" }
-    , { value = Two, suit = Diamonds, face = "🃒" }
-    , { value = Three, suit = Diamonds, face = "🃓" }
-    , { value = Four, suit = Diamonds, face = "🃔" }
-    , { value = Five, suit = Diamonds, face = "🃕" }
-    , { value = Six, suit = Diamonds, face = "🃖" }
-    , { value = Seven, suit = Diamonds, face = "🃗" }
-    , { value = Eight, suit = Diamonds, face = "🃘" }
-    , { value = Nine, suit = Diamonds, face = "🃙" }
-    , { value = Ten, suit = Diamonds, face = "🃚" }
-    , { value = Jack, suit = Diamonds, face = "🃛" }
-    , { value = Queen, suit = Diamonds, face = "🃝" }
-    , { value = King, suit = Diamonds, face = "🃞" }
+    [ { value = Ace, suit = Spades, image = "as" }
+    , { value = Two, suit = Spades, image = "2s" }
+    , { value = Three, suit = Spades, image = "3s" }
+    , { value = Four, suit = Spades, image = "4s" }
+    , { value = Five, suit = Spades, image = "5s" }
+    , { value = Six, suit = Spades, image = "6s" }
+    , { value = Seven, suit = Spades, image = "7s" }
+    , { value = Eight, suit = Spades, image = "8s" }
+    , { value = Nine, suit = Spades, image = "9s" }
+    , { value = Ten, suit = Spades, image = "10s" }
+    , { value = Jack, suit = Spades, image = "js" }
+    , { value = Queen, suit = Spades, image = "qs" }
+    , { value = King, suit = Spades, image = "ks" }
+    , { value = Ace, suit = Hearts, image = "ah" }
+    , { value = Two, suit = Hearts, image = "2h" }
+    , { value = Three, suit = Hearts, image = "3h" }
+    , { value = Four, suit = Hearts, image = "4h" }
+    , { value = Five, suit = Hearts, image = "5h" }
+    , { value = Six, suit = Hearts, image = "6h" }
+    , { value = Seven, suit = Hearts, image = "7h" }
+    , { value = Eight, suit = Hearts, image = "8h" }
+    , { value = Nine, suit = Hearts, image = "9h" }
+    , { value = Ten, suit = Hearts, image = "10h" }
+    , { value = Jack, suit = Hearts, image = "jh" }
+    , { value = Queen, suit = Hearts, image = "qh" }
+    , { value = King, suit = Hearts, image = "kh" }
+    , { value = Ace, suit = Clubs, image = "ac" }
+    , { value = Two, suit = Clubs, image = "2c" }
+    , { value = Three, suit = Clubs, image = "3c" }
+    , { value = Four, suit = Clubs, image = "4c" }
+    , { value = Five, suit = Clubs, image = "5c" }
+    , { value = Six, suit = Clubs, image = "6c" }
+    , { value = Seven, suit = Clubs, image = "7c" }
+    , { value = Eight, suit = Clubs, image = "8c" }
+    , { value = Nine, suit = Clubs, image = "9c" }
+    , { value = Ten, suit = Clubs, image = "10c" }
+    , { value = Jack, suit = Clubs, image = "jc" }
+    , { value = Queen, suit = Clubs, image = "qc" }
+    , { value = King, suit = Clubs, image = "kc" }
+    , { value = Ace, suit = Diamonds, image = "ad" }
+    , { value = Two, suit = Diamonds, image = "2d" }
+    , { value = Three, suit = Diamonds, image = "3d" }
+    , { value = Four, suit = Diamonds, image = "4d" }
+    , { value = Five, suit = Diamonds, image = "5d" }
+    , { value = Six, suit = Diamonds, image = "6d" }
+    , { value = Seven, suit = Diamonds, image = "7d" }
+    , { value = Eight, suit = Diamonds, image = "8d" }
+    , { value = Nine, suit = Diamonds, image = "9d" }
+    , { value = Ten, suit = Diamonds, image = "10d" }
+    , { value = Jack, suit = Diamonds, image = "jd" }
+    , { value = Queen, suit = Diamonds, image = "qd" }
+    , { value = King, suit = Diamonds, image = "kd" }
     ]
-
-
-cardBack : String
-cardBack =
-    "🂠"
 
 
 
@@ -246,14 +241,17 @@ viewCard m c =
                 NoOp
             )
         ]
-        [ text
-            (if isSelected c m.selectedCards || List.member c m.matchedCards then
-                c.face
-
-             else
-                cardBack
-            )
+        [ img [ src (getCardFace c m.selectedCards m.matchedCards) ] []
         ]
+
+
+getCardFace : Card -> SelectedCards -> List Card -> String
+getCardFace c selected matched =
+    if isSelected c selected || List.member c matched then
+        "./cards/" ++ c.image ++ ".svg"
+
+    else
+        "./cards/card_back.svg"
 
 
 isSelected : Card -> SelectedCards -> Bool
