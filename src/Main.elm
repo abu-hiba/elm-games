@@ -217,9 +217,12 @@ view : Model -> Html Msg
 view m =
     div []
         [ div [ class "controls" ]
-            [ button [ onClick StartGame ] [ text "Start" ]
+            [ if m.gameStarted then
+                button [ onClick ResetGame ] [ text "Reset" ]
+
+              else
+                button [ onClick StartGame ] [ text "Start" ]
             , text <| String.fromInt m.timer
-            , button [ onClick ResetGame ] [ text "Reset" ]
             ]
         , div [ class "cards" ] (List.map (viewCard m) m.cards)
         ]
