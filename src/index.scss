@@ -1,29 +1,43 @@
+$primary-color: seagreen;
+
+body {
+    font-family: "Montserrat", sans-serif;
+    color: white;
+    background-color: $primary-color;
+}
+
 .cards {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-evenly;
 }
 
 .card {
-    font-size: 10em;
-    font-family: "DejaVu Sans", sans-serif;
-    flex: 0 0 7.6%;
-
-    @media screen and (max-width: 600px) {
-        font-size: 4em;
-        flex: 0 0 10%;
-    }
-
-    @media screen and (max-width: 1024px) {
-        font-size: 6.9em;
-    }
+    flex: 0 0 14%;
+    height: 12em;
 
     img {
-        height: 1em;
+        height: 11em;
+        width: auto;
     }
-}
 
-.red {
-    color: crimson;
+    @media (min-device-width: 600px) {
+        flex: 0 0 9%;
+        height: 8em;
+
+        img {
+            height: 7em;
+        }
+    }
+
+    @media (min-device-width: 1025px) {
+        flex: 0 0 7.6%;
+        height: 14em;
+
+        img {
+            height: 11em;
+        }
+    }
 }
 
 .back {
@@ -34,9 +48,38 @@
     font-size: 3em;
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: left;
+    margin: 0.7em 0.5em;
 
-    button {
-        font-size: 0.7em;
+    @media (min-device-width: 600px) {
+        margin: 0.3em 0.1em;
+    }
+}
+
+.btn {
+    color: $primary-color;
+    background-color: white;
+    border: 2px solid white;
+    border-radius: 30px;
+    padding: 2px 20px;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 2em;
+    width: 5em; 
+
+    &:focus {
+        outline: none;
+    }
+
+    @media (min-device-width: 600px) {
+        font-size: 1em;
+    }
+}
+
+.timer {
+    font-size: 2.1em;
+    margin-left: 20%;
+
+    @media (min-device-width: 600px) {
+        font-size: 1.4em;
     }
 }
