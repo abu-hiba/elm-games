@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, img, text)
+import Html exposing (Html, button, div, img, span, text)
 import Html.Attributes exposing (class, classList, selected, src)
 import Html.Events exposing (onClick)
 import Random
@@ -218,14 +218,19 @@ view m =
     div []
         [ div [ class "controls" ]
             [ if m.gameStarted then
-                button [ onClick ResetGame ] [ text "Reset" ]
+                btn [ onClick ResetGame ] [ text "Reset" ]
 
               else
-                button [ onClick StartGame ] [ text "Start" ]
-            , text <| String.fromInt m.timer
+                btn [ onClick StartGame ] [ text "Start" ]
+            , span [ class "timer" ] [ text <| String.fromInt m.timer ]
             ]
         , div [ class "cards" ] (List.map (viewCard m) m.cards)
         ]
+
+
+btn : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+btn attr html =
+    button (List.concat [ attr, [ class "btn" ] ]) html
 
 
 viewCard : Model -> Card -> Html Msg
@@ -233,7 +238,6 @@ viewCard m c =
     div
         [ classList
             [ ( "card", True )
-            , ( "red", (c.suit == Hearts || c.suit == Diamonds) && (isSelected c m.selectedCards || List.member c m.matchedCards) )
             , ( "back", not (isSelected c m.selectedCards) )
             ]
         , onClick
