@@ -15,6 +15,7 @@ body {
 .card {
     flex: 0 0 14%;
     height: 12em;
+    touch-action: manipulation;
 
     img {
         height: 11em;
