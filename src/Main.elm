@@ -4,8 +4,8 @@ import Browser
 import Html exposing (Html, button, div, img, span, text)
 import Html.Attributes exposing (class, classList, selected, src)
 import Html.Events exposing (onClick)
-import Html.Lazy exposing (lazy, lazy2)
 import Html.Keyed as Keyed
+import Html.Lazy exposing (lazy, lazy2)
 import Random
 import Random.List exposing (shuffle)
 import Time
@@ -234,13 +234,16 @@ btn : List (Html.Attribute msg) -> List (Html msg) -> Html msg
 btn attr html =
     button (List.concat [ attr, [ class "btn" ] ]) html
 
+
 viewCards : Model -> Html Msg
 viewCards m =
-  Keyed.node "div" [ class "cards" ] (List.map (viewKeyedCard m) m.cards)
+    Keyed.node "div" [ class "cards" ] (List.map (viewKeyedCard m) m.cards)
 
-viewKeyedCard : Model -> Card -> (String, Html Msg)
+
+viewKeyedCard : Model -> Card -> ( String, Html Msg )
 viewKeyedCard m c =
-  ( c.image, lazy2 viewCard m c )
+    ( c.image, lazy2 viewCard m c )
+
 
 viewCard : Model -> Card -> Html Msg
 viewCard m c =
