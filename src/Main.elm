@@ -1,123 +1,47 @@
 module Main exposing (..)
 
 import Browser
+import Browser.Navigation as Nav
+import Url
 import Html exposing (Html, button, div, img, span, text)
 import Html.Attributes exposing (class, classList, selected, src)
 import Html.Events exposing (onClick)
 import Html.Keyed as Keyed
 import Html.Lazy exposing (lazy, lazy2)
 import Random
-import Random.List exposing (shuffle)
+import Random.List
 import Time
-
-
-type CardValue
-    = Ace
-    | Two
-    | Three
-    | Four
-    | Five
-    | Six
-    | Seven
-    | Eight
-    | Nine
-    | Ten
-    | Jack
-    | Queen
-    | King
-
-
-type Suit
-    = Spades
-    | Hearts
-    | Diamonds
-    | Clubs
-
-
-type alias Card =
-    { value : CardValue
-    , suit : Suit
-    , image : String
-    }
-
-
-type alias SelectedCards =
-    ( Maybe Card, Maybe Card )
-
-
-deck : List Card
-deck =
-    [ { value = Ace, suit = Spades, image = "as" }
-    , { value = Two, suit = Spades, image = "2s" }
-    , { value = Three, suit = Spades, image = "3s" }
-    , { value = Four, suit = Spades, image = "4s" }
-    , { value = Five, suit = Spades, image = "5s" }
-    , { value = Six, suit = Spades, image = "6s" }
-    , { value = Seven, suit = Spades, image = "7s" }
-    , { value = Eight, suit = Spades, image = "8s" }
-    , { value = Nine, suit = Spades, image = "9s" }
-    , { value = Ten, suit = Spades, image = "10s" }
-    , { value = Jack, suit = Spades, image = "js" }
-    , { value = Queen, suit = Spades, image = "qs" }
-    , { value = King, suit = Spades, image = "ks" }
-    , { value = Ace, suit = Hearts, image = "ah" }
-    , { value = Two, suit = Hearts, image = "2h" }
-    , { value = Three, suit = Hearts, image = "3h" }
-    , { value = Four, suit = Hearts, image = "4h" }
-    , { value = Five, suit = Hearts, image = "5h" }
-    , { value = Six, suit = Hearts, image = "6h" }
-    , { value = Seven, suit = Hearts, image = "7h" }
-    , { value = Eight, suit = Hearts, image = "8h" }
-    , { value = Nine, suit = Hearts, image = "9h" }
-    , { value = Ten, suit = Hearts, image = "10h" }
-    , { value = Jack, suit = Hearts, image = "jh" }
-    , { value = Queen, suit = Hearts, image = "qh" }
-    , { value = King, suit = Hearts, image = "kh" }
-    , { value = Ace, suit = Clubs, image = "ac" }
-    , { value = Two, suit = Clubs, image = "2c" }
-    , { value = Three, suit = Clubs, image = "3c" }
-    , { value = Four, suit = Clubs, image = "4c" }
-    , { value = Five, suit = Clubs, image = "5c" }
-    , { value = Six, suit = Clubs, image = "6c" }
-    , { value = Seven, suit = Clubs, image = "7c" }
-    , { value = Eight, suit = Clubs, image = "8c" }
-    , { value = Nine, suit = Clubs, image = "9c" }
-    , { value = Ten, suit = Clubs, image = "10c" }
-    , { value = Jack, suit = Clubs, image = "jc" }
-    , { value = Queen, suit = Clubs, image = "qc" }
-    , { value = King, suit = Clubs, image = "kc" }
-    , { value = Ace, suit = Diamonds, image = "ad" }
-    , { value = Two, suit = Diamonds, image = "2d" }
-    , { value = Three, suit = Diamonds, image = "3d" }
-    , { value = Four, suit = Diamonds, image = "4d" }
-    , { value = Five, suit = Diamonds, image = "5d" }
-    , { value = Six, suit = Diamonds, image = "6d" }
-    , { value = Seven, suit = Diamonds, image = "7d" }
-    , { value = Eight, suit = Diamonds, image = "8d" }
-    , { value = Nine, suit = Diamonds, image = "9d" }
-    , { value = Ten, suit = Diamonds, image = "10d" }
-    , { value = Jack, suit = Diamonds, image = "jd" }
-    , { value = Queen, suit = Diamonds, image = "qd" }
-    , { value = King, suit = Diamonds, image = "kd" }
-    ]
-
+import PlayingCards
 
 
 -- MODEL
 
 
-type alias Model =
-    { cards : List Card
+type alias SelectedCards =
+    ( Maybe PlayingCards.Card, Maybe PlayingCards.Card )
+
+type alias PlayingCardsModel =
+    { cards : List PlayingCards.Card
     , selectedCards : SelectedCards
-    , matchedCards : List Card
+    , matchedCards : List PlayingCards.Card
     , timer : Int
     , gameStarted : Bool
     }
 
+type alias Model =
+    { key : Nav.Key
+    , url : Url.Url
+    }
 
-model : Model
-model =
-    { cards = deck
+
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    ( Model key url, Cmd.none )
+
+
+playingCardsModel : PlayingCardsModel
+playingCardsModel =
+    { cards = PlayingCards.deck
     , selectedCards = ( Nothing, Nothing )
     , matchedCards = []
     , timer = 0
@@ -130,9 +54,11 @@ model =
 
 
 type Msg
-    = Shuffle
-    | ShuffledList (List Card)
-    | SelectCard Card
+    = LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
+    | Shuffle
+    | ShuffledList (List PlayingCards.Card)
+    | SelectCard PlayingCards.Card
     | IncrementTimer Time.Posix
     | ResetGame
     | StartGame
@@ -142,8 +68,21 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg currModel =
     case msg of
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, Nav.load href )
+
+        UrlChanged url ->
+            ( { model | url = url }
+            , Cmd.none
+            )
+
         Shuffle ->
-            ( currModel, Random.generate ShuffledList (shuffle model.cards) )
+            ( currModel, Random.generate ShuffledList (Random.List.shuffle model.cards) )
 
         ShuffledList shuffledList ->
             ( { currModel | cards = shuffledList }, Cmd.none )
@@ -185,27 +124,27 @@ update msg currModel =
             ( model, Cmd.none )
 
         StartGame ->
-            ( { currModel | gameStarted = True }, Random.generate ShuffledList (shuffle currModel.cards) )
+            ( { currModel | gameStarted = True }, Random.generate ShuffledList (Random.List.shuffle currModel.cards) )
 
         NoOp ->
             ( currModel, Cmd.none )
 
 
-isPair : Card -> Card -> Bool
+isPair : PlayingCards.Card -> PlayingCards.Card -> Bool
 isPair c1 c2 =
     if c1.value == c2.value then
         case c1.suit of
-            Spades ->
-                c2.suit == Spades || c2.suit == Clubs
+            PlayingCards.Spades ->
+                c2.suit == PlayingCards.Spades || c2.suit == PlayingCards.Clubs
 
-            Clubs ->
-                c2.suit == Spades || c2.suit == Clubs
+            PlayingCards.Clubs ->
+                c2.suit == PlayingCards.Spades || c2.suit == PlayingCards.Clubs
 
-            Hearts ->
-                c2.suit == Hearts || c2.suit == Diamonds
+            PlayingCards.Hearts ->
+                c2.suit == PlayingCards.Hearts || c2.suit == PlayingCards.Diamonds
 
-            Diamonds ->
-                c2.suit == Hearts || c2.suit == Diamonds
+            PlayingCards.Diamonds ->
+                c2.suit == PlayingCards.Hearts || c2.suit == PlayingCards.Diamonds
 
     else
         False
@@ -215,7 +154,7 @@ isPair c1 c2 =
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view m =
     div []
         [ div [ class "controls" ]
@@ -240,12 +179,12 @@ viewCards m =
     Keyed.node "div" [ class "cards" ] (List.map (viewKeyedCard m) m.cards)
 
 
-viewKeyedCard : Model -> Card -> ( String, Html Msg )
+viewKeyedCard : Model -> PlayingCards.Card -> ( String, Html Msg )
 viewKeyedCard m c =
     ( c.image, lazy2 viewCard m c )
 
 
-viewCard : Model -> Card -> Html Msg
+viewCard : Model -> PlayingCards.Card -> Html Msg
 viewCard m c =
     div
         [ classList
@@ -264,7 +203,7 @@ viewCard m c =
         ]
 
 
-getCardFace : Card -> SelectedCards -> List Card -> String
+getCardFace : PlayingCards.Card -> SelectedCards -> List PlayingCards.Card -> String
 getCardFace c selected matched =
     if isSelected c selected || List.member c matched then
         "./cards/" ++ c.image ++ ".svg"
@@ -273,7 +212,7 @@ getCardFace c selected matched =
         "./cards/card_back.svg"
 
 
-isSelected : Card -> SelectedCards -> Bool
+isSelected : PlayingCards.Card -> SelectedCards -> Bool
 isSelected c currentSelected =
     case currentSelected of
         ( Nothing, Just sc ) ->
@@ -304,9 +243,11 @@ subscriptions m =
 
 main : Program () Model Msg
 main =
-    Browser.element
-        { init = \_ -> ( model, Cmd.none )
+    Browser.application
+        { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
         }
