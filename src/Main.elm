@@ -2,243 +2,141 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
+import Html exposing (Html, text, h3)
+import Route
 import Url
-import Html exposing (Html, button, div, img, span, text)
-import Html.Attributes exposing (class, classList, selected, src)
-import Html.Events exposing (onClick)
-import Html.Keyed as Keyed
-import Html.Lazy exposing (lazy, lazy2)
-import Random
-import Random.List
-import Time
-import PlayingCards
+import Page.Pairs as Pairs
 
 
 -- MODEL
 
 
-type alias SelectedCards =
-    ( Maybe PlayingCards.Card, Maybe PlayingCards.Card )
-
-type alias PlayingCardsModel =
-    { cards : List PlayingCards.Card
-    , selectedCards : SelectedCards
-    , matchedCards : List PlayingCards.Card
-    , timer : Int
-    , gameStarted : Bool
-    }
+type Page
+    = NotFoundPage
+    | PairsPage Pairs.Model
 
 type alias Model =
-    { key : Nav.Key
-    , url : Url.Url
+    { route : Route.Route
+    , page : Page
+    , navKey : Nav.Key
+
+    -- , playingCardsModel : PlayingCardsModel
     }
+
+
+type Msg
+    = PairsPageMsg Pairs.Msg
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    ( Model key url, Cmd.none )
+init _ url navKey =
+    let
+        model =
+            { route = Route.parseUrl url
+            , page = NotFoundPage
+            , navKey = navKey
+            }
+    in
+    initCurrentPage ( model, Cmd.none )
+    
 
+initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+initCurrentPage ( model, existingCmds ) =
+    let
+        ( currentPage, mappedPageCmds ) =
+            case model.route of
+                Route.NotFound ->
+                    ( NotFoundPage, Cmd.none )
 
-playingCardsModel : PlayingCardsModel
-playingCardsModel =
-    { cards = PlayingCards.deck
-    , selectedCards = ( Nothing, Nothing )
-    , matchedCards = []
-    , timer = 0
-    , gameStarted = False
-    }
-
+                Route.Pairs ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            Pairs.init
+                    in
+                        ( PairsPage pageModel, Cmd.map PairsPageMsg pageCmds )
+    in
+        ( { model | page = currentPage }
+        , Cmd.batch [ existingCmds, mappedPageCmds ]
+        )
 
 
 -- UPDATE
 
 
-type Msg
-    = LinkClicked Browser.UrlRequest
-    | UrlChanged Url.Url
-    | Shuffle
-    | ShuffledList (List PlayingCards.Card)
-    | SelectCard PlayingCards.Card
-    | IncrementTimer Time.Posix
-    | ResetGame
-    | StartGame
-    | NoOp
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg currModel =
-    case msg of
-        LinkClicked urlRequest ->
+update msg model =
+    case ( msg, model.page ) of
+        ( PairsPageMsg subMsg, PairsPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmd ) =
+                    Pairs.update subMsg pageModel
+            in
+                ( { model | page = PairsPage updatedPageModel }
+                , Cmd.map PairsPageMsg updatedCmd
+                )
+
+        ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
-
-                Browser.External href ->
-                    ( model, Nav.load href )
-
-        UrlChanged url ->
-            ( { model | url = url }
-            , Cmd.none
-            )
-
-        Shuffle ->
-            ( currModel, Random.generate ShuffledList (Random.List.shuffle model.cards) )
-
-        ShuffledList shuffledList ->
-            ( { currModel | cards = shuffledList }, Cmd.none )
-
-        SelectCard selectedCard ->
-            case currModel.selectedCards of
-                ( Nothing, Nothing ) ->
-                    ( { currModel | selectedCards = ( Just selectedCard, Nothing ) }, Cmd.none )
-
-                ( Just _, Just _ ) ->
-                    ( { currModel | selectedCards = ( Just selectedCard, Nothing ) }, Cmd.none )
-
-                ( Just c, Nothing ) ->
-                    ( { currModel
-                        | selectedCards =
-                            if List.member selectedCard currModel.matchedCards || (c == selectedCard) then
-                                ( Just c, Nothing )
-
-                            else
-                                ( Just c, Just selectedCard )
-                        , matchedCards =
-                            if isPair c selectedCard && not (c == selectedCard) then
-                                c :: selectedCard :: currModel.matchedCards
-
-                            else
-                                currModel.matchedCards
-                      }
-                    , Cmd.none
+                    ( model
+                    , Nav.pushUrl model.navKey (Url.toString url)
                     )
 
-                -- should never occur
-                ( Nothing, Just _ ) ->
-                    ( currModel, Cmd.none )
+                Browser.External url ->
+                    ( model
+                    , Nav.load url
+                    )
 
-        IncrementTimer _ ->
-            ( { currModel | timer = currModel.timer + 1 }, Cmd.none )
+        ( UrlChanged url, _ ) ->
+            let
+                newRoute =
+                    Route.parseUrl url
+            in
+                ( { model | route = newRoute }, Cmd.none )
+                    |> initCurrentPage
 
-        ResetGame ->
+        ( _, _ ) ->
             ( model, Cmd.none )
-
-        StartGame ->
-            ( { currModel | gameStarted = True }, Random.generate ShuffledList (Random.List.shuffle currModel.cards) )
-
-        NoOp ->
-            ( currModel, Cmd.none )
-
-
-isPair : PlayingCards.Card -> PlayingCards.Card -> Bool
-isPair c1 c2 =
-    if c1.value == c2.value then
-        case c1.suit of
-            PlayingCards.Spades ->
-                c2.suit == PlayingCards.Spades || c2.suit == PlayingCards.Clubs
-
-            PlayingCards.Clubs ->
-                c2.suit == PlayingCards.Spades || c2.suit == PlayingCards.Clubs
-
-            PlayingCards.Hearts ->
-                c2.suit == PlayingCards.Hearts || c2.suit == PlayingCards.Diamonds
-
-            PlayingCards.Diamonds ->
-                c2.suit == PlayingCards.Hearts || c2.suit == PlayingCards.Diamonds
-
-    else
-        False
-
 
 
 -- VIEW
 
 
 view : Model -> Browser.Document Msg
-view m =
-    div []
-        [ div [ class "controls" ]
-            [ if m.gameStarted then
-                btn [ onClick ResetGame ] [ text "Reset" ]
-
-              else
-                btn [ onClick StartGame ] [ text "Start" ]
-            , span [ class "timer" ] [ text <| String.fromInt m.timer ]
-            ]
-        , lazy viewCards m
-        ]
+view model =
+    { title = "Card games"
+    , body = [ currentView model ]
+    }
 
 
-btn : List (Html.Attribute msg) -> List (Html msg) -> Html msg
-btn attr html =
-    button (List.concat [ attr, [ class "btn" ] ]) html
+currentView : Model -> Html Msg
+currentView model =
+    case model.page of
+        NotFoundPage ->
+            notFoundView
+
+        PairsPage pageModel ->
+            Pairs.view pageModel
+                |> Html.map PairsPageMsg
 
 
-viewCards : Model -> Html Msg
-viewCards m =
-    Keyed.node "div" [ class "cards" ] (List.map (viewKeyedCard m) m.cards)
-
-
-viewKeyedCard : Model -> PlayingCards.Card -> ( String, Html Msg )
-viewKeyedCard m c =
-    ( c.image, lazy2 viewCard m c )
-
-
-viewCard : Model -> PlayingCards.Card -> Html Msg
-viewCard m c =
-    div
-        [ classList
-            [ ( "card", True )
-            , ( "back", not (isSelected c m.selectedCards) )
-            ]
-        , onClick
-            (if m.gameStarted then
-                SelectCard c
-
-             else
-                NoOp
-            )
-        ]
-        [ img [ src (getCardFace c m.selectedCards m.matchedCards) ] []
-        ]
-
-
-getCardFace : PlayingCards.Card -> SelectedCards -> List PlayingCards.Card -> String
-getCardFace c selected matched =
-    if isSelected c selected || List.member c matched then
-        "./cards/" ++ c.image ++ ".svg"
-
-    else
-        "./cards/card_back.svg"
-
-
-isSelected : PlayingCards.Card -> SelectedCards -> Bool
-isSelected c currentSelected =
-    case currentSelected of
-        ( Nothing, Just sc ) ->
-            sc == c
-
-        ( Just sc, Nothing ) ->
-            sc == c
-
-        ( Just sc1, Just sc2 ) ->
-            (sc1 == c) || (sc2 == c)
-
-        ( Nothing, Nothing ) ->
-            False
-
+notFoundView : Html msg
+notFoundView =
+    h3 [] [ text "The page you requested was not found" ]
 
 
 -- Subscriptions
 
 
 subscriptions : Model -> Sub Msg
-subscriptions m =
-    if m.gameStarted && (List.length m.matchedCards < 52) then
-        Time.every 1000 IncrementTimer
-
-    else
-        Sub.none
+subscriptions model =
+    case model.page of
+        NotFoundPage ->
+            Sub.none
+        PairsPage pairs ->
+            Sub.map PairsPageMsg (Pairs.subscriptions pairs)
 
 
 main : Program () Model Msg
