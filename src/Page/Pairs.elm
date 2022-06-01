@@ -1,14 +1,14 @@
 module Page.Pairs exposing (..)
 
-import PlayingCards
-import Time
-import Random
-import Random.List
 import Html exposing (Html, button, div, img, span, text)
 import Html.Attributes exposing (class, classList, selected, src)
 import Html.Events exposing (onClick)
 import Html.Keyed as Keyed
 import Html.Lazy exposing (lazy, lazy2)
+import PlayingCards
+import Random
+import Random.List
+import Time
 
 
 

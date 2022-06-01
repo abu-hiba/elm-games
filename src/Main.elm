@@ -2,10 +2,12 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, text, h3)
+import Html exposing (Html, h3, text)
+import Page.Home as Home
+import Page.Pairs as Pairs
 import Route
 import Url
-import Page.Pairs as Pairs
+
 
 
 -- MODEL
@@ -13,14 +15,14 @@ import Page.Pairs as Pairs
 
 type Page
     = NotFoundPage
+    | HomePage
     | PairsPage Pairs.Model
+
 
 type alias Model =
     { route : Route.Route
     , page : Page
     , navKey : Nav.Key
-
-    -- , playingCardsModel : PlayingCardsModel
     }
 
 
@@ -40,7 +42,7 @@ init _ url navKey =
             }
     in
     initCurrentPage ( model, Cmd.none )
-    
+
 
 initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 initCurrentPage ( model, existingCmds ) =
@@ -55,11 +57,15 @@ initCurrentPage ( model, existingCmds ) =
                         ( pageModel, pageCmds ) =
                             Pairs.init
                     in
-                        ( PairsPage pageModel, Cmd.map PairsPageMsg pageCmds )
+                    ( PairsPage pageModel, Cmd.map PairsPageMsg pageCmds )
+
+                Route.Home ->
+                    ( HomePage, Cmd.none )
     in
-        ( { model | page = currentPage }
-        , Cmd.batch [ existingCmds, mappedPageCmds ]
-        )
+    ( { model | page = currentPage }
+    , Cmd.batch [ existingCmds, mappedPageCmds ]
+    )
+
 
 
 -- UPDATE
@@ -73,9 +79,9 @@ update msg model =
                 ( updatedPageModel, updatedCmd ) =
                     Pairs.update subMsg pageModel
             in
-                ( { model | page = PairsPage updatedPageModel }
-                , Cmd.map PairsPageMsg updatedCmd
-                )
+            ( { model | page = PairsPage updatedPageModel }
+            , Cmd.map PairsPageMsg updatedCmd
+            )
 
         ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
@@ -94,11 +100,12 @@ update msg model =
                 newRoute =
                     Route.parseUrl url
             in
-                ( { model | route = newRoute }, Cmd.none )
-                    |> initCurrentPage
+            ( { model | route = newRoute }, Cmd.none )
+                |> initCurrentPage
 
         ( _, _ ) ->
             ( model, Cmd.none )
+
 
 
 -- VIEW
@@ -121,10 +128,14 @@ currentView model =
             Pairs.view pageModel
                 |> Html.map PairsPageMsg
 
+        HomePage ->
+            Home.view
+
 
 notFoundView : Html msg
 notFoundView =
     h3 [] [ text "The page you requested was not found" ]
+
 
 
 -- Subscriptions
@@ -135,8 +146,12 @@ subscriptions model =
     case model.page of
         NotFoundPage ->
             Sub.none
+
         PairsPage pairs ->
             Sub.map PairsPageMsg (Pairs.subscriptions pairs)
+
+        HomePage ->
+            Sub.none
 
 
 main : Program () Model Msg

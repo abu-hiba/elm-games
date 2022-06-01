@@ -6,6 +6,7 @@ import Url.Parser as Parser
 
 type Route
     = NotFound
+    | Home
     | Pairs
 
 
@@ -22,6 +23,6 @@ parseUrl url =
 matchRoute : Parser.Parser (Route -> a) a
 matchRoute =
     Parser.oneOf
-        [ Parser.map Pairs Parser.top
+        [ Parser.map Home Parser.top
         , Parser.map Pairs (Parser.s "pairs")
         ]
