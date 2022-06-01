@@ -66,6 +66,8 @@ body {
     font-family: "Ubuntu", sans-serif;
     font-size: 2em;
     width: 5em; 
+    text-align: center;
+    cursor: pointer;
 
     &:focus {
         outline: none;
@@ -74,6 +76,35 @@ body {
     @media (min-device-width: 600px) {
         font-size: 1em;
     }
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10em;
+}
+
+.menu-list--item {
+    color: $primary-color;
+    background-color: white;
+    border-radius: 100px;
+    padding: 2px 20px;
+    width: 20em;
+    height: 5em;
+    margin-bottom: 2em;
+}
+
+.menu-list--link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 3em;
+    font-family: "Ubuntu", sans-serif;
+    color: $primary-color;
+    text-decoration: none;
 }
 
 .timer {
