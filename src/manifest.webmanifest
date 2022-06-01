@@ -1,10 +1,10 @@
 {
     "name": "ElmGames",
     "short_name": "ElmGames",
-    "start_url": "./index.html",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#fff",
-    "description": "Pairs game written with elm",
+    "description": "Card games written with elm",
     "icons": [{
       "src": "icon-48.png",
       "sizes": "48x48",
