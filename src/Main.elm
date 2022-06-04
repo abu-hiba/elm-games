@@ -3,6 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html, h3, text)
+import Page
 import Page.Home as Home
 import Page.Pairs as Pairs
 import Route
@@ -122,10 +123,10 @@ currentView : Model -> Html Msg
 currentView model =
     case model.page of
         NotFoundPage ->
-            notFoundView
+            Page.view [ notFoundView ]
 
         PairsPage pageModel ->
-            Pairs.view pageModel
+            Page.view [ Pairs.view pageModel ]
                 |> Html.map PairsPageMsg
 
         HomePage ->
