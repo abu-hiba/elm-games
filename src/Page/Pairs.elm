@@ -168,7 +168,7 @@ viewCard m c =
     div
         [ classList
             [ ( "card", True )
-            , ( "back", not (isSelected c m.selectedCards) )
+            , ( "card--back", not (isSelected c m.selectedCards) )
             ]
         , onClick
             (if m.gameStarted then
