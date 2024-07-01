@@ -30,7 +30,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, Cmd.none )
+    ( model, Random.generate ShuffledList (Random.List.shuffle PlayingCards.deck) )
 
 
 model : Model
@@ -69,7 +69,17 @@ update msg currModel =
         SelectCard selectedCard ->
             case currModel.selectedCards of
                 ( Nothing, Nothing ) ->
-                    ( { currModel | selectedCards = ( Just selectedCard, Nothing ) }, Cmd.none )
+                    ( { currModel
+                        | selectedCards = ( Just selectedCard, Nothing )
+                        , gameStarted =
+                            if currModel.gameStarted == False then
+                                True
+
+                            else
+                                currModel.gameStarted
+                      }
+                    , Cmd.none
+                    )
 
                 ( Just _, Just _ ) ->
                     ( { currModel | selectedCards = ( Just selectedCard, Nothing ) }, Cmd.none )
@@ -100,7 +110,7 @@ update msg currModel =
             ( { currModel | timer = currModel.timer + 1 }, Cmd.none )
 
         ResetGame ->
-            ( model, Cmd.none )
+            ( model, Random.generate ShuffledList (Random.List.shuffle PlayingCards.deck) )
 
         StartGame ->
             ( { currModel | gameStarted = True }, Random.generate ShuffledList (Random.List.shuffle currModel.cards) )
@@ -136,14 +146,7 @@ isPair c1 c2 =
 view : Model -> Html Msg
 view m =
     div []
-        [ div [ class "controls" ]
-            [ if m.gameStarted then
-                btn [ onClick ResetGame ] [ text "Reset" ]
-
-              else
-                btn [ onClick StartGame ] [ text "Start" ]
-            , span [ class "timer" ] [ text <| String.fromInt m.timer ]
-            ]
+        [ div [ class "timer" ] [ text <| String.fromInt m.timer ]
         , lazy viewCards m
         ]
 
@@ -170,16 +173,9 @@ viewCard m c =
             [ ( "card", True )
             , ( "card--back", not (isSelected c m.selectedCards) )
             ]
-        , onClick
-            (if m.gameStarted then
-                SelectCard c
-
-             else
-                NoOp
-            )
+        , onClick (SelectCard c)
         ]
-        [ img [ src (getCardFace c m.selectedCards m.matchedCards) ] []
-        ]
+        [ img [ src (getCardFace c m.selectedCards m.matchedCards) ] [] ]
 
 
 getCardFace : PlayingCards.Card -> SelectedCards -> List PlayingCards.Card -> String

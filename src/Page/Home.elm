@@ -23,7 +23,7 @@ model : Model
 model =
     Model
         [ { text = "Pairs", route = "/pairs" }
-        , { text = "Blackjack", route = "/blackjack" }
+        , { text = "Solitaire", route = "/solitaire" }
         ]
 
 
