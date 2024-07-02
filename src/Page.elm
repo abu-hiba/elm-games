@@ -11,8 +11,4 @@ view children =
 
 backButton : Html msg
 backButton =
-    let
-        arrow =
-            String.fromChar '←'
-    in
-    a [ href "/" ] [ button [ class "home-btn" ] [ text arrow ] ]
+    a [ class "btn home-btn", href "/" ] [ text "❮ Home" ]
