@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "mkdir -p dev && cp -r src/cards dev/cards && parcel src/index.html -d dev",
-    "build": "mkdir dist && parcel build src/index.html --no-source-maps && cp -r src/cards dist/cards",
+    "build": "mkdir -p dist && parcel build src/index.html --no-source-maps && cp -r src/cards dist/cards",
     "elm": "./node_modules/elm/bin/elm",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
